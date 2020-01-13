@@ -48,6 +48,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Blueprint Widgets", Meta = (BlueprintProtected = true))
 	TSubclassOf<class UUserWidget> CraftMenuHUDClass;
 
+	UFUNCTION(BlueprintPure, Category = Widgets)
+	class UUserWidget* GetCurrentWidget();
+
 	/* The current hud being displayed on the screen */
 	class UUserWidget* CurrentWidget;
 };

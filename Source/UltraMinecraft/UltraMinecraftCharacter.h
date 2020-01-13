@@ -188,7 +188,10 @@ private:
 	/* Put the current item*/
 	void Put();
 
-	/*  */
+	/* Show or hide Crafting HUD*/
+	void ShowHideCrafting();
+
+	/* Change Selected Inventory Slot  */
 	void MoveUpInventorySlot();
 	void MoveDownInventorySlot();
 

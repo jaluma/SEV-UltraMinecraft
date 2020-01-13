@@ -139,6 +139,8 @@ void AUltraMinecraftCharacter::SetupPlayerInputComponent(class UInputComponent* 
 
 	PlayerInputComponent->BindAction("PutBlocks", IE_Pressed, this, &AUltraMinecraftCharacter::Put);
 
+	
+	PlayerInputComponent->BindAction("Inventary", IE_Pressed, this, &AUltraMinecraftCharacter::ShowHideCrafting);
 	PlayerInputComponent->BindAction("InventoryDown", IE_Pressed, this, &AUltraMinecraftCharacter::MoveUpInventorySlot);
 	PlayerInputComponent->BindAction("InventoryUp", IE_Pressed, this, &AUltraMinecraftCharacter::MoveDownInventorySlot);
 
@@ -180,14 +182,16 @@ AWieldable* AUltraMinecraftCharacter::GetItemByIndex(int32 Index)
 
 bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 {
-	const int32 AvailableSlot = Inventory.Find(nullptr);
-	if (AvailableSlot != INDEX_NONE) {
-		Inventory[AvailableSlot] = Item;
-		// Update mesh if it's change
-		if (Inventory[CurrentInventorySlot] != NULL && Inventory[CurrentInventorySlot]->WieldableMesh != nullptr) {
-			UpdateWieldedItem();
+	if (Item != nullptr) {
+		const int32 AvailableSlot = Inventory.Find(nullptr);
+		if (AvailableSlot != INDEX_NONE) {
+			Inventory[AvailableSlot] = Item;
+			// Update mesh if it's change
+			if (Inventory[CurrentInventorySlot] != NULL && Inventory[CurrentInventorySlot]->WieldableMesh != nullptr) {
+				UpdateWieldedItem();
+			}
+			return true;
 		}
-		return true;
 	}
 	return false;
 }
@@ -461,6 +465,18 @@ void AUltraMinecraftCharacter::Put()
 			UpdateWieldedItem();
 		}
 	}
+}
+
+void AUltraMinecraftCharacter::ShowHideCrafting()
+{
+	AUltraMinecraftGameMode * mymode = Cast<AUltraMinecraftGameMode>(GetWorld()->GetAuthGameMode());
+	if (mymode->GetHUDState() == mymode->EHUDState::HS_Craft_Menu) {
+		mymode->ChangeHUDState(mymode->EHUDState::HS_Ingame);
+	}
+	else {
+		mymode->ChangeHUDState(mymode->EHUDState::HS_Craft_Menu);
+	}
+
 }
 
 void AUltraMinecraftCharacter::MoveDownInventorySlot()

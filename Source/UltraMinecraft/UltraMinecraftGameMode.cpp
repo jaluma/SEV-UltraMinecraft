@@ -29,15 +29,19 @@ void AUltraMinecraftGameMode::ApplyHUDChange()
 	switch (HUDState) {
 		case EHUDState::HS_Ingame: {
 			ApplyHUD(IngameHUDClass, false, false);
+			break;
 		}
 		case EHUDState::HS_Inventory: {
 			ApplyHUD(InventoryHUDClass, true, true);
+			break;
 		}
 		case EHUDState::HS_Craft_Menu: {
-			ApplyHUD(CraftMenuHUDClass, true, true);
+			ApplyHUD(CraftMenuHUDClass, false, false);
+			break;
 		}
 		default: {
 			ApplyHUD(IngameHUDClass, false, false);
+			break;
 		}
 	}
 }
@@ -66,9 +70,15 @@ bool AUltraMinecraftGameMode::ApplyHUD(TSubclassOf<class UUserWidget> WidgetToAp
 
 		if (CurrentWidget != nullptr) {
 			CurrentWidget->AddToViewport();
+			CurrentWidget->SetKeyboardFocus();
 			return true;
 		}
 	}
 
 	return false;
+}
+
+UUserWidget * AUltraMinecraftGameMode::GetCurrentWidget()
+{
+	return CurrentWidget;
 }
