@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Block.h"
 #include "GameFramework/Character.h"
+#include "Wieldable.h"
 #include "UltraMinecraftCharacter.generated.h"
 
 class UInputComponent;
@@ -49,7 +50,7 @@ public:
 
 	/** Gun mesh: 1st person view (seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-		class USkeletalMeshComponent* FP_ItemRight;
+	class USkeletalMeshComponent* FP_ItemRight;
 
 protected:
 	virtual void BeginPlay();
@@ -82,6 +83,37 @@ public:
 	/** Whether to use motion controller location for aiming. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	int32 InitialPlayerHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	int32 PlayerHealth;
+
+	/* Get current index */
+	UFUNCTION(BlueprintPure, Category = HUD)
+	int32 GetCurrentInventorySlot();
+
+	/* Get current Item */
+	UFUNCTION(BlueprintPure, Category = HUD)
+	AWieldable* GetItemByIndex(int32 Index);
+
+	/* Add inventory to our inventory */
+	UFUNCTION(BlueprintPure, Category = Inventory)
+	bool AddItemToInventory(AWieldable* Item);
+
+	/* Get Current inventory slot */
+	UFUNCTION(BlueprintPure, Category = Inventory)
+	UTexture2D* GetThumnailAtInventorySlot(uint8 Slot);
+
+	UFUNCTION(BlueprintPure, Category = Inventory)
+	bool DecPlayerHealth(uint8 Dec);
+
+	UFUNCTION(BlueprintPure, Category = Inventory)
+	int32 GetInitialHealth();
+
+	UFUNCTION(BlueprintPure, Category = Inventory)
+	int32 GetHealth();
 
 	uint8 ToolType;
 	uint8 ToolMaterial;
@@ -139,6 +171,27 @@ protected:
 	bool EnableTouchscreenMovement(UInputComponent* InputComponent);
 
 private:
+	const int32 NUM_OF_INVENTORY_SLOTS = 9;
+
+	/* Current inv slot */
+	int32 CurrentInventorySlot;
+
+	/* Update the wielded item */
+	void UpdateWieldedItem();
+
+	/* Gets the current wielded item */
+	AWieldable* GetCurrentWieldedItem();
+
+	/* Throw the current item*/
+	void Throw();
+
+	/* Put the current item*/
+	void Put();
+
+	/*  */
+	void MoveUpInventorySlot();
+	void MoveDownInventorySlot();
+
 	/* Value of player is breaking a block*/
 	bool bIsBreaking;
 
@@ -164,6 +217,11 @@ private:
 	/* Timer handles */
 	FTimerHandle BlockBreakingHandler;
 	FTimerHandle HitAnimHandle;
+
+	UPROPERTY(EditAnywhere)
+	TArray<AWieldable*> Inventory;
+
+	UStaticMeshComponent* CopyMesh;
 
 public:
 	/** Returns Mesh1P subobject **/

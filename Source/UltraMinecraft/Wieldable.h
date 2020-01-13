@@ -26,11 +26,13 @@ public:
 	 
 	enum ETool : uint8
 	{
-		Unarmed,
-		Pickaxe,
-		Axe,
-		Shovel,
-		Sword
+		Unarmed = 0,
+		Block = 1,
+		Pickaxe = 2,
+		Axe = 3,
+		Shovel = 4,
+		Sword = 5,
+
 	};
 
 	enum EMaterial : uint8
@@ -50,11 +52,20 @@ public:
 	uint8 MaterialType;
 
 	UPROPERTY(EditAnywhere)
-	USkeletalMeshComponent* WieldableMesh;
+	UStaticMeshComponent* WieldableMesh;
 
 	UPROPERTY(EditAnywhere)
 	UShapeComponent* PickupTrigger;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
+	UTexture2D* PickupThumbnail;
+
+	bool IsActive;
+
 	UFUNCTION()
 	void OnRadiusEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	void Hide(bool bVis);
+
+	void OnUsed();
 };

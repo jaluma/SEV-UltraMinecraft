@@ -4,6 +4,8 @@
 #include "UltraMinecraftHUD.h"
 #include "UltraMinecraftCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 AUltraMinecraftGameMode::AUltraMinecraftGameMode()
 	: Super()
@@ -14,4 +16,59 @@ AUltraMinecraftGameMode::AUltraMinecraftGameMode()
 
 	// use our custom HUD class
 	HUDClass = AUltraMinecraftHUD::StaticClass();
+
+	HUDState = EHUDState::HS_Ingame;
+}
+
+void AUltraMinecraftGameMode::ApplyHUDChange()
+{
+	if (CurrentWidget != nullptr) {
+		CurrentWidget->RemoveFromParent();
+	}
+
+	switch (HUDState) {
+		case EHUDState::HS_Ingame: {
+			ApplyHUD(IngameHUDClass, false, false);
+		}
+		case EHUDState::HS_Inventory: {
+			ApplyHUD(InventoryHUDClass, true, true);
+		}
+		case EHUDState::HS_Craft_Menu: {
+			ApplyHUD(CraftMenuHUDClass, true, true);
+		}
+		default: {
+			ApplyHUD(IngameHUDClass, false, false);
+		}
+	}
+}
+
+uint8 AUltraMinecraftGameMode::GetHUDState()
+{
+	return HUDState;
+}
+
+void AUltraMinecraftGameMode::ChangeHUDState(uint8 NewState)
+{
+	HUDState = NewState;
+	ApplyHUDChange();
+}
+
+bool AUltraMinecraftGameMode::ApplyHUD(TSubclassOf<class UUserWidget> WidgetToApply, bool ShowMouseCursor, bool EnableClickEvents)
+{
+	AUltraMinecraftCharacter* myChracter = Cast<AUltraMinecraftCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+	APlayerController* MyController = GetWorld()->GetFirstPlayerController();
+
+	if (WidgetToApply != nullptr) {
+		MyController->bShowMouseCursor = ShowMouseCursor;
+		MyController->bEnableClickEvents = EnableClickEvents;
+
+		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetToApply);
+
+		if (CurrentWidget != nullptr) {
+			CurrentWidget->AddToViewport();
+			return true;
+		}
+	}
+
+	return false;
 }

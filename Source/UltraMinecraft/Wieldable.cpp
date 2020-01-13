@@ -11,7 +11,7 @@ AWieldable::AWieldable()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	WieldableMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WieldableMesh"));
+	WieldableMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WieldableMesh"));
 
 	PickupTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("PickupTrigger"));
 
@@ -21,6 +21,7 @@ AWieldable::AWieldable()
 
 	MaterialType = EMaterial::None;
 	ToolType = ETool::Unarmed;
+	IsActive = true;
 }
 
 // Called when the game starts or when spawned
@@ -42,10 +43,25 @@ void AWieldable::Tick(float DeltaTime)
 
 void AWieldable::OnRadiusEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	AUltraMinecraftCharacter* Character = Cast<AUltraMinecraftCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-	Character->FP_ItemRight->SetSkeletalMesh(WieldableMesh->SkeletalMesh);
-	Character->ToolMaterial = MaterialType;
-	Character->ToolType = ToolType;
+	if (IsActive) {
+		AUltraMinecraftCharacter* Character = Cast<AUltraMinecraftCharacter>(OtherActor);
+		if (Character != nullptr) {
+			Character->AddItemToInventory(this);
+
+			Hide(true);
+			//OnUsed();
+		}
+	}
+}
+
+void AWieldable::Hide(bool bVis)
+{
+	WieldableMesh->SetVisibility(!bVis);
+	IsActive = !bVis;
+}
+
+void AWieldable::OnUsed()
+{
 	Destroy();
 }
 

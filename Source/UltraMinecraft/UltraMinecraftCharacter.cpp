@@ -10,6 +10,7 @@
 #include "Kismet/HeadMountedDisplayFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "MotionControllerComponent.h"
+#include "UltraMinecraftGameMode.h"
 #include "Engine.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
@@ -42,7 +43,7 @@ AUltraMinecraftCharacter::AUltraMinecraftCharacter()
 	Mesh1P->RelativeLocation = FVector(-0.5f, -4.4f, -155.7f);
 
 	// Create a gun mesh component
-	FP_ItemRight = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun"));
+	FP_ItemRight = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_ItemRight"));
 	FP_ItemRight->SetOnlyOwnerSee(true);			// only the owning player will see this mesh
 	FP_ItemRight->bCastDynamicShadow = false;
 	FP_ItemRight->CastShadow = false;
@@ -81,9 +82,13 @@ AUltraMinecraftCharacter::AUltraMinecraftCharacter()
 	VR_MuzzleLocation->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));		// Counteract the rotation of the VR gun model.
 
 	// Uncomment the following line to turn motion controllers on by default:
-	//bUsingMotionControllers = true;
+	bUsingMotionControllers = false;
 
-	Reach = 400;	
+	Inventory.Init(nullptr, NUM_OF_INVENTORY_SLOTS);
+
+	Reach = 400;
+	InitialPlayerHealth = 10;
+	PlayerHealth = InitialPlayerHealth;
 }
 
 void AUltraMinecraftCharacter::BeginPlay()
@@ -92,7 +97,7 @@ void AUltraMinecraftCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	FP_ItemRight->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	//FP_ItemRight->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 
 	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
 	if (bUsingMotionControllers)
@@ -105,6 +110,11 @@ void AUltraMinecraftCharacter::BeginPlay()
 		VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
+
+	AUltraMinecraftGameMode * mymode = Cast<AUltraMinecraftGameMode>(GetWorld()->GetAuthGameMode());
+	mymode->ApplyHUDChange();
+
+	UpdateWieldedItem();
 }
 
 void AUltraMinecraftCharacter::Tick(float DeltaTime)
@@ -125,6 +135,13 @@ void AUltraMinecraftCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction("Throw", IE_Pressed, this, &AUltraMinecraftCharacter::Throw);
+
+	PlayerInputComponent->BindAction("PutBlocks", IE_Pressed, this, &AUltraMinecraftCharacter::Put);
+
+	PlayerInputComponent->BindAction("InventoryDown", IE_Pressed, this, &AUltraMinecraftCharacter::MoveUpInventorySlot);
+	PlayerInputComponent->BindAction("InventoryUp", IE_Pressed, this, &AUltraMinecraftCharacter::MoveDownInventorySlot);
+
 	//InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &AUltraMinecraftCharacter::TouchStarted);
 	if (EnableTouchscreenMovement(PlayerInputComponent) == false)
 	{
@@ -144,6 +161,62 @@ void AUltraMinecraftCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	PlayerInputComponent->BindAxis("TurnRate", this, &AUltraMinecraftCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AUltraMinecraftCharacter::LookUpAtRate);
+}
+
+int32 AUltraMinecraftCharacter::GetCurrentInventorySlot()
+{
+	return CurrentInventorySlot;
+}
+
+AWieldable* AUltraMinecraftCharacter::GetItemByIndex(int32 Index)
+{ 
+	if (Index >= 0 && Index < NUM_OF_INVENTORY_SLOTS) {
+		return Inventory[Index];
+	}
+	else {
+		return nullptr;
+	}
+}
+
+bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
+{
+	const int32 AvailableSlot = Inventory.Find(nullptr);
+	if (AvailableSlot != INDEX_NONE) {
+		Inventory[AvailableSlot] = Item;
+		// Update mesh if it's change
+		if (Inventory[CurrentInventorySlot] != NULL && Inventory[CurrentInventorySlot]->WieldableMesh != nullptr) {
+			UpdateWieldedItem();
+		}
+		return true;
+	}
+	return false;
+}
+
+UTexture2D* AUltraMinecraftCharacter::GetThumnailAtInventorySlot(uint8 Slot)
+{
+	if (Inventory[Slot] != NULL) {
+		return Inventory[Slot]->PickupThumbnail;
+	}
+	return nullptr;
+}
+
+bool AUltraMinecraftCharacter::DecPlayerHealth(uint8 Dec)
+{
+	if (PlayerHealth - Dec > 0) {
+		PlayerHealth -= Dec;
+		return true;
+	}
+	return false;
+}
+
+int32 AUltraMinecraftCharacter::GetInitialHealth()
+{
+	return InitialPlayerHealth;
+}
+
+int32 AUltraMinecraftCharacter::GetHealth()
+{
+	return PlayerHealth;
 }
 
 void AUltraMinecraftCharacter::OnFire()
@@ -305,6 +378,107 @@ bool AUltraMinecraftCharacter::EnableTouchscreenMovement(class UInputComponent* 
 		//PlayerInputComponent->BindTouch(EInputEvent::IE_Repeat, this, &AUltraMinecraftCharacter::TouchUpdate);
 	}
 	return bResult;
+}
+
+void AUltraMinecraftCharacter::UpdateWieldedItem()
+{
+	//if (CopyMesh != nullptr) {
+	//	CopyMesh->DestroyComponent();
+	//}
+
+	//if (GetCurrentWieldedItem() != nullptr) {
+	//	CopyMesh = Inventory[CurrentInventorySlot]->WieldableMesh;
+	//	CopyMesh->SetupAttachment(FP_ItemRight);
+	//	//CopyMesh->AttachToComponent(FP_ItemRight, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("Item"));
+	//}
+}
+
+AWieldable * AUltraMinecraftCharacter::GetCurrentWieldedItem()
+{
+	return Inventory[CurrentInventorySlot] != NULL ? Inventory[CurrentInventorySlot] : nullptr;
+}
+
+void AUltraMinecraftCharacter::Throw()
+{
+	AWieldable* ItemToThrow = GetCurrentWieldedItem();
+
+	FHitResult LinetraceHit;
+
+	FVector StartTrace = FirstPersonCameraComponent->GetComponentLocation();
+	FVector EndTrace = (FirstPersonCameraComponent->GetForwardVector() * Reach) + StartTrace;
+
+	FCollisionQueryParams CQP;
+	CQP.AddIgnoredActor(this);
+
+	GetWorld()->LineTraceSingleByChannel(LinetraceHit, StartTrace, EndTrace, ECollisionChannel::ECC_WorldDynamic, CQP);
+
+	FVector DropLocation = EndTrace;
+	if (LinetraceHit.GetActor() != NULL) {
+		DropLocation = (LinetraceHit.ImpactPoint + 20.f);
+	}
+
+	if (ItemToThrow != nullptr) {
+		UWorld* const World = GetWorld();
+		if (World != NULL) {
+			ItemToThrow->SetActorLocationAndRotation(DropLocation, FRotator::ZeroRotator);
+			ItemToThrow->Hide(false); 
+			//ItemToThrow->Destroy();
+
+			ItemToThrow->IsActive = true;
+			Inventory[CurrentInventorySlot] = NULL;
+			UpdateWieldedItem();
+		}
+	}
+}
+
+void AUltraMinecraftCharacter::Put()
+{
+	AWieldable* ItemToThrow = GetCurrentWieldedItem();
+
+	FHitResult LinetraceHit;
+
+	FVector StartTrace = FirstPersonCameraComponent->GetComponentLocation();
+	FVector EndTrace = (FirstPersonCameraComponent->GetForwardVector() * Reach) + StartTrace;
+
+	FCollisionQueryParams CQP;
+	CQP.AddIgnoredActor(this);
+
+	GetWorld()->LineTraceSingleByChannel(LinetraceHit, StartTrace, EndTrace, ECollisionChannel::ECC_WorldDynamic, CQP);
+
+	FVector DropLocation = EndTrace;
+	if (LinetraceHit.GetActor() != NULL) {
+		DropLocation = (LinetraceHit.ImpactPoint + 20.f);
+	}
+
+	if (ItemToThrow != nullptr) {
+		UWorld* const World = GetWorld();
+		if (World != NULL) {
+			ABlock* Block = GetWorld()->SpawnActor<ABlock>(DropLocation, FRotator::ZeroRotator);
+			Block->SM_Block = ItemToThrow->WieldableMesh;
+			ItemToThrow->Destroy();
+
+			Inventory[CurrentInventorySlot] = NULL;
+			UpdateWieldedItem();
+		}
+	}
+}
+
+void AUltraMinecraftCharacter::MoveDownInventorySlot()
+{
+	CurrentInventorySlot--;
+	if (CurrentInventorySlot < 0) {
+		CurrentInventorySlot = NUM_OF_INVENTORY_SLOTS - 1;
+	}
+	UpdateWieldedItem();
+}
+
+void AUltraMinecraftCharacter::MoveUpInventorySlot()
+{
+	CurrentInventorySlot++;
+	if (CurrentInventorySlot >= NUM_OF_INVENTORY_SLOTS) {
+		CurrentInventorySlot = 0;
+	}
+	UpdateWieldedItem();
 }
 
 void AUltraMinecraftCharacter::OnHit()

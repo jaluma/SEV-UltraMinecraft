@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Wieldable.h"
 #include "Block.generated.h"
 
 UCLASS()
@@ -30,6 +31,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Resistance;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class AWieldable> WieldableType;
+
 	UPROPERTY(BlueprintReadWrite)
 	float BreakingStage;
 
@@ -37,5 +41,5 @@ public:
 
 	void ResetBlock();
 
-	void OnBroken(bool HasRequiredTool, ANSICHAR* typeTool);
+	void OnBroken(bool HasRequiredTool);
 };

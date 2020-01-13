@@ -8,6 +8,7 @@ ABlock::ABlock()
 {
 	SM_Block = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Block Mesh"));
 
+	// Replace in Blueprint class
 	Resistance = 20.f;
 	BreakingStage = 0.f;
 	MinimumMaterial = 0;
@@ -33,7 +34,7 @@ void ABlock::Break()
 
 	// it's broken
 	if (BreakingStage == 5.f) {
-		OnBroken(true, "Pichaxe");
+		OnBroken(true);
 	}
 }
 
@@ -47,7 +48,14 @@ void ABlock::ResetBlock()
 	}
 }
 
-void ABlock::OnBroken(bool HasRequiredTool, ANSICHAR * typeTool)
+void ABlock::OnBroken(bool HasRequiredTool)
 {
+	FVector SpawnLocation = GetActorLocation();
+	TSubclassOf<class AWieldable> ClassType = WieldableType;
+
 	Destroy();
+
+	if (ClassType != NULL) {
+		GetWorld()->SpawnActor<AWieldable>(ClassType, SpawnLocation, FRotator::ZeroRotator);
+	}
 }
