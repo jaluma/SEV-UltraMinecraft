@@ -7,6 +7,16 @@
 ABlock::ABlock()
 {
 	SM_Block = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Block Mesh"));
+	SetRootComponent(SM_Block);
+
+	CollisionMesh = CreateDefaultSubobject<UBoxComponent>(FName("Collision Mesh"));
+	FVector Scale;
+	Scale.X = 1.6;
+	Scale.Y = 1.6;
+	Scale.Z = 1.6;
+	CollisionMesh->SetRelativeScale3D(Scale);
+	CollisionMesh->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	CollisionMesh->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
 
 	// Replace in Blueprint class
 	Resistance = 20.f;

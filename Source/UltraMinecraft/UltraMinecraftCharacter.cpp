@@ -416,7 +416,7 @@ void AUltraMinecraftCharacter::Throw()
 
 void AUltraMinecraftCharacter::Put()
 {
-	AWieldable* ItemToThrow = GetCurrentWieldedItem();
+	AWieldable* ItemToPut = GetCurrentWieldedItem();
 
 	FHitResult LinetraceHit;
 
@@ -430,18 +430,23 @@ void AUltraMinecraftCharacter::Put()
 
 	FVector DropLocation = EndTrace;
 	if (LinetraceHit.GetActor() != NULL) {
-		DropLocation = (LinetraceHit.ImpactPoint + 20.f);
-	}
+		DropLocation = (LinetraceHit.ImpactPoint);
+		if (ItemToPut != nullptr) {
+			UWorld* const World = GetWorld();
+			if (World != nullptr && ItemToPut->ToolType == 1) {
+				bool bNoCollisionFail = false;
+				FActorSpawnParameters ActorSpawnParams;
+				ActorSpawnParams.SpawnCollisionHandlingOverride = bNoCollisionFail ? ESpawnActorCollisionHandlingMethod::AlwaysSpawn : ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	if (ItemToThrow != nullptr) {
-		UWorld* const World = GetWorld();
-		if (World != NULL) {
-			ABlock* Block = GetWorld()->SpawnActor<ABlock>(DropLocation, FRotator::ZeroRotator);
-			Block->SM_Block = ItemToThrow->WieldableMesh;
-			ItemToThrow->Destroy();
+				ABlock* Block = Cast<ABlock>(World->SpawnActor<AActor>(ItemToPut->BlockType, DropLocation, FRotator::ZeroRotator, ActorSpawnParams));
+				Block->SetActorLocationAndRotation(DropLocation, FRotator::ZeroRotator);
 
-			Inventory[CurrentInventorySlot] = NULL;
-			UpdateWieldedItem();
+				//ItemToPut->Hide(true);
+				ItemToPut->Destroy();
+
+				Inventory[CurrentInventorySlot] = NULL;
+				UpdateWieldedItem();
+			}
 		}
 	}
 }

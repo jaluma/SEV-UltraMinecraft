@@ -46,6 +46,9 @@ public:
 	};
 
 	UPROPERTY(EditAnywhere)
+	FString Name;
+
+	UPROPERTY(EditAnywhere)
 	uint8 ToolType;
 
 	UPROPERTY(EditAnywhere)
@@ -59,6 +62,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
 	UTexture2D* PickupThumbnail;
+
+	//it's AActor class, NOT BLOCK
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class AActor> BlockType;
 
 	bool IsActive;
 

@@ -48,8 +48,8 @@ void AWieldable::OnRadiusEnter(UPrimitiveComponent* OverlappedComp, AActor* Othe
 		if (Character != nullptr) {
 			Character->AddItemToInventory(this);
 
-			Hide(true);
-			//OnUsed();
+			//Hide(true);
+			OnUsed();
 		}
 	}
 }

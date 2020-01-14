@@ -22,8 +22,10 @@ protected:
 
 public:	
 	// Called every frame
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UBoxComponent* CollisionMesh;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* SM_Block;
 
 	uint8 MinimumMaterial;
