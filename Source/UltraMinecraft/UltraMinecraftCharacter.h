@@ -50,7 +50,7 @@ public:
 
 	/** Gun mesh: 1st person view (seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	class USkeletalMeshComponent* FP_ItemRight;
+	class UStaticMeshComponent* FP_ItemRight;
 
 protected:
 	virtual void BeginPlay();

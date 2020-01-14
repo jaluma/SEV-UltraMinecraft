@@ -5,6 +5,7 @@
 #include "UltraMinecraftCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Blueprint/UserWidget.h"
+#include "ItemCrafting.h"
 #include "Kismet/GameplayStatics.h"
 
 AUltraMinecraftGameMode::AUltraMinecraftGameMode()
@@ -18,6 +19,11 @@ AUltraMinecraftGameMode::AUltraMinecraftGameMode()
 	HUDClass = AUltraMinecraftHUD::StaticClass();
 
 	HUDState = EHUDState::HS_Ingame;
+
+	// init data crafting table
+	//static ConstructorHelpers::FObjectFinder<UDataTable>
+	//	CraftingDataTable_BP(TEXT("DataTable'/Game/Data/GameObjectLookup.GameObjectLookup'"));
+	//CraftingDataTable = CraftingDataTable_BP.Object;
 }
 
 void AUltraMinecraftGameMode::ApplyHUDChange()
@@ -81,4 +87,32 @@ bool AUltraMinecraftGameMode::ApplyHUD(TSubclassOf<class UUserWidget> WidgetToAp
 UUserWidget * AUltraMinecraftGameMode::GetCurrentWidget()
 {
 	return CurrentWidget;
+}
+
+TArray<FItemCrafting> AUltraMinecraftGameMode::GetAvailableCrafting()
+{
+	TArray<FItemCrafting> CraftingArray;
+	FString ContextString;
+	TArray<FName> RowNames;
+	RowNames = CraftingDataTable->GetRowNames();
+
+	//for (auto& name : RowNames)
+	//{
+	//	FItemInfo* row = CraftingDataTable->FindRow<FItemCrafting>(name, ContextString);
+	//	if (row)
+	//	{
+	//		CraftingArray.Add(*row);
+	//	}
+	//}
+	return CraftingArray;
+}
+
+FItemCrafting AUltraMinecraftGameMode::GetCrafting(FItemCrafting itemInfo)
+{
+	for (auto& c : GetAvailableCrafting())
+	{
+		itemInfo.Return = c.Return;
+	}
+
+	return itemInfo;
 }

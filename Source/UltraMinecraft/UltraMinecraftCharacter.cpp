@@ -43,7 +43,7 @@ AUltraMinecraftCharacter::AUltraMinecraftCharacter()
 	Mesh1P->RelativeLocation = FVector(-0.5f, -4.4f, -155.7f);
 
 	// Create a gun mesh component
-	FP_ItemRight = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_ItemRight"));
+	FP_ItemRight = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FP_ItemRight"));
 	FP_ItemRight->SetOnlyOwnerSee(true);			// only the owning player will see this mesh
 	FP_ItemRight->bCastDynamicShadow = false;
 	FP_ItemRight->CastShadow = false;
@@ -97,7 +97,7 @@ void AUltraMinecraftCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	//FP_ItemRight->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	FP_ItemRight->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 
 	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
 	if (bUsingMotionControllers)
@@ -301,44 +301,6 @@ void AUltraMinecraftCharacter::EndTouch(const ETouchIndex::Type FingerIndex, con
 	TouchItem.bIsPressed = false;
 }
 
-//Commenting this section out to be consistent with FPS BP template.
-//This allows the user to turn without using the right virtual joystick
-
-//void AUltraMinecraftCharacter::TouchUpdate(const ETouchIndex::Type FingerIndex, const FVector Location)
-//{
-//	if ((TouchItem.bIsPressed == true) && (TouchItem.FingerIndex == FingerIndex))
-//	{
-//		if (TouchItem.bIsPressed)
-//		{
-//			if (GetWorld() != nullptr)
-//			{
-//				UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport();
-//				if (ViewportClient != nullptr)
-//				{
-//					FVector MoveDelta = Location - TouchItem.Location;
-//					FVector2D ScreenSize;
-//					ViewportClient->GetViewportSize(ScreenSize);
-//					FVector2D ScaledDelta = FVector2D(MoveDelta.X, MoveDelta.Y) / ScreenSize;
-//					if (FMath::Abs(ScaledDelta.X) >= 4.0 / ScreenSize.X)
-//					{
-//						TouchItem.bMoved = true;
-//						float Value = ScaledDelta.X * BaseTurnRate;
-//						AddControllerYawInput(Value);
-//					}
-//					if (FMath::Abs(ScaledDelta.Y) >= 4.0 / ScreenSize.Y)
-//					{
-//						TouchItem.bMoved = true;
-//						float Value = ScaledDelta.Y * BaseTurnRate;
-//						AddControllerPitchInput(Value);
-//					}
-//					TouchItem.Location = Location;
-//				}
-//				TouchItem.Location = Location;
-//			}
-//		}
-//	}
-//}
-
 void AUltraMinecraftCharacter::MoveForward(float Value)
 {
 	if (Value != 0.0f)
@@ -386,15 +348,32 @@ bool AUltraMinecraftCharacter::EnableTouchscreenMovement(class UInputComponent* 
 
 void AUltraMinecraftCharacter::UpdateWieldedItem()
 {
-	//if (CopyMesh != nullptr) {
-	//	CopyMesh->DestroyComponent();
-	//}
+	if (GetCurrentWieldedItem() != nullptr) {
+		if (CopyMesh != nullptr) {
+			CopyMesh->DestroyComponent();
+		}
+		//CopyMesh = Inventory[CurrentInventorySlot]->WieldableMesh;
+		FP_ItemRight->SetStaticMesh(Inventory[CurrentInventorySlot]->WieldableMesh->GetStaticMesh());
 
-	//if (GetCurrentWieldedItem() != nullptr) {
-	//	CopyMesh = Inventory[CurrentInventorySlot]->WieldableMesh;
-	//	CopyMesh->SetupAttachment(FP_ItemRight);
-	//	//CopyMesh->AttachToComponent(FP_ItemRight, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("Item"));
-	//}
+		// it's a block
+		if (Inventory[CurrentInventorySlot]->ToolType == 1) {
+			FVector Relative3DScale;
+			Relative3DScale.X = 0.2;
+			Relative3DScale.Y = 0.2;
+			Relative3DScale.Z = 0.2;
+			FP_ItemRight->SetRelativeScale3D(Relative3DScale);
+		}
+		else {
+			FVector Relative3DScale;
+			Relative3DScale.X = 1;
+			Relative3DScale.Y = 1;
+			Relative3DScale.Z = 1;
+			FP_ItemRight->SetRelativeScale3D(Relative3DScale);
+		}
+	}
+	else {
+		FP_ItemRight->SetStaticMesh(NULL);
+	}
 }
 
 AWieldable * AUltraMinecraftCharacter::GetCurrentWieldedItem()

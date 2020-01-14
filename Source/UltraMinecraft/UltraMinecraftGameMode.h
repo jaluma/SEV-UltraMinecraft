@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Engine/DataTable.h"
+#include "ItemCrafting.h"
 #include "UltraMinecraftGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -32,6 +34,12 @@ public:
 	/* Applies a hud to the screen, returns true if successful, false otherwise */
 	bool ApplyHUD(TSubclassOf<class UUserWidget> WidgetToApply, bool ShowMouseCursor, bool EnableClickEvents);
 
+	UFUNCTION(BlueprintCallable, Category = "Crafting")
+	TArray<FItemCrafting> GetAvailableCrafting();
+
+	UFUNCTION(BlueprintCallable, Category = "Crafting")
+	FItemCrafting GetCrafting(FItemCrafting itemInfo);
+
 protected:
 	/* Current HUD State */
 	uint8 HUDState;
@@ -53,6 +61,8 @@ protected:
 
 	/* The current hud being displayed on the screen */
 	class UUserWidget* CurrentWidget;
+
+	UDataTable* CraftingDataTable;
 };
 
 
