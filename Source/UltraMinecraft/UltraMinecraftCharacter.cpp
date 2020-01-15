@@ -203,10 +203,12 @@ bool AUltraMinecraftCharacter::AddItemToCraftingTableAt(int32 Index)
 
 void AUltraMinecraftCharacter::GetCraftingItem()
 {
-	if (AddItemToInventory(CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1])) {
-		// reset crafting table
-		CraftingInventory.Init(nullptr, NUM_OF_CRAFTING_INVENTORY_SLOTS);
+	// Try to add item to inventory, if Inventory full -> Throw item
+	if (!AddItemToInventory(CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1])) {
+		Throw(CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1]);
 	}
+	// reset crafting table
+	CraftingInventory.Init(nullptr, NUM_OF_CRAFTING_INVENTORY_SLOTS);
 }
 
 bool AUltraMinecraftCharacter::AddItemToCraftingTableAt(int32 Index, bool bReturnEdit)
@@ -245,18 +247,27 @@ void AUltraMinecraftCharacter::AddItemToCraft(int32 Index) {
 void AUltraMinecraftCharacter::UpdatePossiblyCraft()
 {
 	AUltraMinecraftGameMode * mymode = Cast<AUltraMinecraftGameMode>(GetWorld()->GetAuthGameMode());
-	for (auto& c : mymode->GetAvailableCrafting()) {
-		if (CheckCraftCorrect(0, c.Item1) && CheckCraftCorrect(1, c.Item2) &&
-			CheckCraftCorrect(2, c.Item3) && CheckCraftCorrect(3, c.Item4) &&
-			CheckCraftCorrect(4, c.Item5) && CheckCraftCorrect(5, c.Item6) &&
-			CheckCraftCorrect(6, c.Item7) && CheckCraftCorrect(7, c.Item8) &&
-			CheckCraftCorrect(8, c.Item9)) {
+	for (auto c : mymode->GetAvailableCrafting()) {
+		if (
+			//CheckCraftCorrect(0, c.Item1) && 
+			CheckCraftCorrect(1, c.Item2)
+			//&&
+			//CheckCraftCorrect(2, c.Item3) && CheckCraftCorrect(3, c.Item4) &&
+			//CheckCraftCorrect(4, c.Item5) && CheckCraftCorrect(5, c.Item6) &&
+			//CheckCraftCorrect(6, c.Item7) && CheckCraftCorrect(7, c.Item8) &&
+			//CheckCraftCorrect(8, c.Item9)
+			) {
+
+			if (CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] != nullptr) {
+				CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1]->Destroy();
+			}
 
 			AWieldable* WieldableObject = Cast<AWieldable>(
 				mymode->SpawnBlueprintFromPath(GetWorld(), c.Return, FVector(0.f, 0.f, 0.f), FRotator::ZeroRotator));
-			if (!AddItemToInventory(WieldableObject)) {
-				Throw(WieldableObject);
-			}
+			WieldableObject->IsActive = false;
+			CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] = WieldableObject;
+
+			break;
 		}
 	}
 }

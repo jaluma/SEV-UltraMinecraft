@@ -38,9 +38,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Crafting")
 	TArray<FItemCrafting> GetAvailableCrafting();
 
-	UFUNCTION(BlueprintCallable, Category = "Crafting")
-	FItemCrafting GetCrafting(FItemCrafting itemInfo);
-
 	AActor* SpawnBlueprintFromPath(UWorld* MyWorld, const FString PathToBlueprint, const FVector SpawnLocation, FRotator SpawnRotation);
 
 protected:
