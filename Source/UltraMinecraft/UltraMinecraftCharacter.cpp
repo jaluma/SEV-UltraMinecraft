@@ -523,19 +523,37 @@ void AUltraMinecraftCharacter::Put()
 
 	GetWorld()->LineTraceSingleByChannel(LinetraceHit, StartTrace, EndTrace, ECollisionChannel::ECC_WorldDynamic, CQP);
 
-	FVector DropLocation = EndTrace;
 	if (LinetraceHit.GetActor() != NULL) {
-		DropLocation = (LinetraceHit.ImpactPoint);
+		FVector Impact = (LinetraceHit.ImpactPoint);
+
+		int x = abs(Impact.X);
+		float Xmod = x % 100;
+		int y = abs(Impact.Y);
+		float Ymod = y % 100;
+		int z = abs(Impact.Z);
+		float Zmod = z % 100;
+
+		float xRes = Xmod >= 50 ? x + (100 - Xmod) : x - Xmod;
+		float yRes = Ymod >= 50 ? y + (100 - Ymod) : y - Ymod;
+		float zRes = Zmod >= 50 ? z + (100 - Zmod) : z - Zmod;
+
+		FVector DropLocation = FVector(
+			Impact.X >= 0 ? xRes : -xRes,
+			Impact.Y >= 0 ? yRes : -yRes,
+			Impact.Z >= 0 ? zRes : -zRes
+		);
+
+		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, DropLocation.ToCompactString());
+
 		if (ItemToPut != nullptr) {
 			UWorld* const World = GetWorld();
 			if (World != nullptr && ItemToPut->ToolType == 1) {
-				bool bNoCollisionFail = false;
+				bool bNoCollisionFail = true;
 				FActorSpawnParameters ActorSpawnParams;
 				ActorSpawnParams.SpawnCollisionHandlingOverride = bNoCollisionFail ? ESpawnActorCollisionHandlingMethod::AlwaysSpawn : ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 				ActorSpawnParams.bNoFail = true;
 
-				ABlock* Block = Cast<ABlock>(World->SpawnActor<AActor>(ItemToPut->BlockType, DropLocation, FRotator::ZeroRotator, ActorSpawnParams));
-				Block->SetActorLocationAndRotation(DropLocation, FRotator::ZeroRotator);
+				ABlock* Block = Cast<ABlock>(World->SpawnActor<AActor>(ItemToPut->BlockType, DropLocation, FRotator::ZeroRotator));
 
 				//ItemToPut->Hide(true);
 				ItemToPut->Destroy();
