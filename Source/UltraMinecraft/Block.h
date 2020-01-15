@@ -28,6 +28,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* SM_Block;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 MinimumMaterial;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

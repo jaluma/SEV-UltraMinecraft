@@ -104,10 +104,10 @@ public:
 
 	/* Get Current inventory slot */
 	UFUNCTION(BlueprintPure, Category = Inventory)
-	UTexture2D* GetThumnailAtInventorySlot(uint8 Slot);
+	UTexture2D* GetThumnailAtInventorySlot(int32 Slot);
 
 	UFUNCTION(BlueprintPure, Category = Inventory)
-	bool DecPlayerHealth(uint8 Dec);
+	bool DecPlayerHealth(int32 Dec);
 
 	UFUNCTION(BlueprintPure, Category = Inventory)
 	int32 GetInitialHealth();

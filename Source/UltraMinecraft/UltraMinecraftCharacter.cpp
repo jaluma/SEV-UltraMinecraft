@@ -183,7 +183,7 @@ AWieldable* AUltraMinecraftCharacter::GetItemByIndex(int32 Index)
 bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 {
 	if (Item != nullptr) {
-		const int32 AvailableSlot = Inventory.Find(nullptr);
+ 		const int32 AvailableSlot = Inventory.Find(nullptr);
 		if (AvailableSlot != INDEX_NONE) {
 			Inventory[AvailableSlot] = Item;
 			// Update mesh if it's change
@@ -196,7 +196,7 @@ bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 	return false;
 }
 
-UTexture2D* AUltraMinecraftCharacter::GetThumnailAtInventorySlot(uint8 Slot)
+UTexture2D* AUltraMinecraftCharacter::GetThumnailAtInventorySlot(int32 Slot)
 {
 	if (Inventory[Slot] != NULL) {
 		return Inventory[Slot]->PickupThumbnail;
@@ -204,7 +204,7 @@ UTexture2D* AUltraMinecraftCharacter::GetThumnailAtInventorySlot(uint8 Slot)
 	return nullptr;
 }
 
-bool AUltraMinecraftCharacter::DecPlayerHealth(uint8 Dec)
+bool AUltraMinecraftCharacter::DecPlayerHealth(int32 Dec)
 {
 	if (PlayerHealth - Dec > 0) {
 		PlayerHealth -= Dec;
@@ -370,9 +370,16 @@ void AUltraMinecraftCharacter::UpdateWieldedItem()
 			Relative3DScale.Z = 1;
 			FP_ItemRight->SetRelativeScale3D(Relative3DScale);
 		}
+
+		// update tool material and type
+		ToolType = Inventory[CurrentInventorySlot]->ToolType;
+		ToolMaterial = Inventory[CurrentInventorySlot]->MaterialType;
 	}
 	else {
 		FP_ItemRight->SetStaticMesh(NULL);
+
+		ToolType = 0;
+		ToolMaterial = 1;
 	}
 }
 
@@ -437,6 +444,7 @@ void AUltraMinecraftCharacter::Put()
 				bool bNoCollisionFail = false;
 				FActorSpawnParameters ActorSpawnParams;
 				ActorSpawnParams.SpawnCollisionHandlingOverride = bNoCollisionFail ? ESpawnActorCollisionHandlingMethod::AlwaysSpawn : ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+				ActorSpawnParams.bNoFail = true;
 
 				ABlock* Block = Cast<ABlock>(World->SpawnActor<AActor>(ItemToPut->BlockType, DropLocation, FRotator::ZeroRotator, ActorSpawnParams));
 				Block->SetActorLocationAndRotation(DropLocation, FRotator::ZeroRotator);

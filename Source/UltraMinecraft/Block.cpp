@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Block.h"
+#include "UltraMinecraftCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -15,8 +17,9 @@ ABlock::ABlock()
 	Scale.Y = 1.6;
 	Scale.Z = 1.6;
 	CollisionMesh->SetRelativeScale3D(Scale);
+
 	CollisionMesh->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	CollisionMesh->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+	CollisionMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 
 	// Replace in Blueprint class
 	Resistance = 20.f;
@@ -33,18 +36,24 @@ void ABlock::BeginPlay()
 
 void ABlock::Break()
 {
-	++BreakingStage;
-	float CrackingValue = 1.0f - (BreakingStage / 5.f);
+	// check if character using minimum tool
+	AUltraMinecraftCharacter* Character = Cast<AUltraMinecraftCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	uint8 MaterialType = Character->ToolMaterial;
 
-	UMaterialInstanceDynamic* MatInstance = SM_Block->CreateDynamicMaterialInstance(0);
+	if (MinimumMaterial < MaterialType) {
+		++BreakingStage;
+		float CrackingValue = 1.0f - (BreakingStage / 5.f);
 
-	if (MatInstance != nullptr) {
-		MatInstance->SetScalarParameterValue(FName("CrackingValue"), CrackingValue);
-	}
+		UMaterialInstanceDynamic* MatInstance = SM_Block->CreateDynamicMaterialInstance(0);
 
-	// it's broken
-	if (BreakingStage == 5.f) {
-		OnBroken(true);
+		if (MatInstance != nullptr) {
+			MatInstance->SetScalarParameterValue(FName("CrackingValue"), CrackingValue);
+		}
+
+		// it's broken
+		if (BreakingStage == 5.f) {
+			OnBroken(true);
+		}
 	}
 }
 

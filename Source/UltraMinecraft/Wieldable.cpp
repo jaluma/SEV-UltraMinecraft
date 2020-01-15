@@ -46,10 +46,10 @@ void AWieldable::OnRadiusEnter(UPrimitiveComponent* OverlappedComp, AActor* Othe
 	if (IsActive) {
 		AUltraMinecraftCharacter* Character = Cast<AUltraMinecraftCharacter>(OtherActor);
 		if (Character != nullptr) {
-			Character->AddItemToInventory(this);
-
-			//Hide(true);
-			OnUsed();
+			if (Character->AddItemToInventory(this)) {
+				//Hide(true);
+				OnUsed();
+			}
 		}
 	}
 }
