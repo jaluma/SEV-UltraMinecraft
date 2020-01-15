@@ -116,3 +116,17 @@ FItemCrafting AUltraMinecraftGameMode::GetCrafting(FItemCrafting itemInfo)
 
 	return itemInfo;
 }
+
+AActor* AUltraMinecraftGameMode::SpawnBlueprintFromPath(UWorld* MyWorld, const FString PathToBlueprint, const FVector SpawnLocation, FRotator SpawnRotation)
+{
+	FStringAssetReference ItemToReference(PathToBlueprint);
+	UObject* ItemObject = ItemToReference.ResolveObject();
+	if ((ItemObject) && (MyWorld))
+	{
+		UBlueprint* GeneratedBP = Cast<UBlueprint>(ItemObject);
+		return MyWorld->SpawnActor<AActor>(GeneratedBP->GeneratedClass, SpawnLocation, SpawnRotation);
+	}
+	else {
+		return NULL;
+	}
+}

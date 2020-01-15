@@ -22,6 +22,8 @@ AWieldable::AWieldable()
 	MaterialType = EMaterial::None;
 	ToolType = ETool::Unarmed;
 	IsActive = true;
+	
+	ClassName = GetClass()->GetName();
 }
 
 // Called when the game starts or when spawned

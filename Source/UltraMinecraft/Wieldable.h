@@ -69,6 +69,8 @@ public:
 
 	bool IsActive;
 
+	FString ClassName;
+
 	UFUNCTION()
 	void OnRadiusEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 

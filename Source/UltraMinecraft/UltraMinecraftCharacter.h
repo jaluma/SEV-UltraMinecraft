@@ -196,6 +196,7 @@ private:
 
 	/* Throw the current item*/
 	void Throw();
+	void Throw(AWieldable* ItemToThrow);
 
 	/* Put the current item*/
 	void Put();
@@ -228,6 +229,8 @@ private:
 	void AddItemToCraft(int32 Index);
 
 	void UpdatePossiblyCraft();
+
+	bool CheckCraftCorrect(int32 Index, FString Item);
 
 	/* Reference to block in front*/
 	ABlock* CurrentBlock;
