@@ -25,6 +25,7 @@ public:
 	/* Checks the hud state, and then calls applyhud to apply whatever hud we are using */
 	void ApplyHUDChange();
 
+	UFUNCTION(BlueprintPure, Category = "HUD Functions")
 	uint8 GetHUDState();
 
 	/* Setter functionfor hudstate, applies the new states and then calls ApplyHUDChange */

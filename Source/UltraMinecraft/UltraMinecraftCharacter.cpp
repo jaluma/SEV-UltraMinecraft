@@ -85,6 +85,7 @@ AUltraMinecraftCharacter::AUltraMinecraftCharacter()
 	bUsingMotionControllers = false;
 
 	Inventory.Init(nullptr, NUM_OF_INVENTORY_SLOTS);
+	CraftingInventory.Init(nullptr, NUM_OF_CRAFTING_INVENTORY_SLOTS);
 
 	Reach = 400;
 	InitialPlayerHealth = 10;
@@ -138,7 +139,6 @@ void AUltraMinecraftCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	PlayerInputComponent->BindAction("Throw", IE_Pressed, this, &AUltraMinecraftCharacter::Throw);
 
 	PlayerInputComponent->BindAction("PutBlocks", IE_Pressed, this, &AUltraMinecraftCharacter::Put);
-
 	
 	PlayerInputComponent->BindAction("Inventary", IE_Pressed, this, &AUltraMinecraftCharacter::ShowHideCrafting);
 	PlayerInputComponent->BindAction("InventoryDown", IE_Pressed, this, &AUltraMinecraftCharacter::MoveUpInventorySlot);
@@ -196,10 +196,68 @@ bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 	return false;
 }
 
+bool AUltraMinecraftCharacter::AddItemToCraftingTableAt(int32 Index)
+{
+	return AddItemToCraftingTableAt(Index, false);
+}
+
+void AUltraMinecraftCharacter::GetCraftingItem()
+{
+	if (AddItemToInventory(CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1])) {
+		// reset crafting table
+		CraftingInventory.Init(nullptr, NUM_OF_CRAFTING_INVENTORY_SLOTS);
+	}
+}
+
+bool AUltraMinecraftCharacter::AddItemToCraftingTableAt(int32 Index, bool bReturnEdit)
+{
+	if (Index != NULL && Index >= 0 && Index < NUM_OF_CRAFTING_INVENTORY_SLOTS) {
+		if (Index == NUM_OF_CRAFTING_INVENTORY_SLOTS - 1) {
+			if (bReturnEdit) {
+				// read and write
+				AddItemToCraft(Index);
+				return true;
+			}
+		}
+		else {
+			AddItemToCraft(Index);
+			return true;
+		}
+	}
+	return false;
+}
+
+void AUltraMinecraftCharacter::AddItemToCraft(int32 Index) {
+	if (CraftingInventory[Index] == nullptr) {
+		CraftingInventory[Index] = Inventory[CurrentInventorySlot];
+		Inventory[CurrentInventorySlot] = nullptr;
+	}
+	else {
+		// swap crafting item by inventory item
+		AWieldable* Temp = Inventory[CurrentInventorySlot];
+		Inventory[CurrentInventorySlot] = CraftingInventory[Index];
+		CraftingInventory[Index] = Temp;
+	}
+	UpdateWieldedItem();
+	UpdatePossiblyCraft();
+}
+
+void AUltraMinecraftCharacter::UpdatePossiblyCraft()
+{
+}
+
 UTexture2D* AUltraMinecraftCharacter::GetThumnailAtInventorySlot(int32 Slot)
 {
 	if (Inventory[Slot] != NULL) {
 		return Inventory[Slot]->PickupThumbnail;
+	}
+	return nullptr;
+}
+
+UTexture2D* AUltraMinecraftCharacter::GetThumnailAtCraftingInventorySlot(int32 Slot)
+{
+	if (CraftingInventory[Slot] != NULL) {
+		return CraftingInventory[Slot]->PickupThumbnail;
 	}
 	return nullptr;
 }

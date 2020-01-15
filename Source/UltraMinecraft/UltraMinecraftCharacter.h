@@ -99,7 +99,7 @@ public:
 	AWieldable* GetItemByIndex(int32 Index);
 
 	/* Add inventory to our inventory */
-	UFUNCTION(BlueprintPure, Category = Inventory)
+	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool AddItemToInventory(AWieldable* Item);
 
 	/* Get Current inventory slot */
@@ -114,6 +114,17 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = Inventory)
 	int32 GetHealth();
+
+	/* Add item to crafting */
+	UFUNCTION(BlueprintCallable, Category = Crafting)
+	bool AddItemToCraftingTableAt(int32 Index);
+
+	UFUNCTION(BlueprintCallable, Category = Crafting)
+	void GetCraftingItem();
+
+	/* Get Thumnail crafting inventory slot */
+	UFUNCTION(BlueprintPure, Category = Crafting)
+	UTexture2D* GetThumnailAtCraftingInventorySlot(int32 Slot);
 
 	uint8 ToolType;
 	uint8 ToolMaterial;
@@ -172,6 +183,7 @@ protected:
 
 private:
 	const int32 NUM_OF_INVENTORY_SLOTS = 9;
+	const int32 NUM_OF_CRAFTING_INVENTORY_SLOTS = 10;	// 9 slots + 1 return (index = 9)
 
 	/* Current inv slot */
 	int32 CurrentInventorySlot;
@@ -211,6 +223,12 @@ private:
 	/* Called when we want to break a block */
 	void BreakBlock();
 
+	bool AddItemToCraftingTableAt(int32 Index, bool bReturnEdit);
+
+	void AddItemToCraft(int32 Index);
+
+	void UpdatePossiblyCraft();
+
 	/* Reference to block in front*/
 	ABlock* CurrentBlock;
 
@@ -223,6 +241,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TArray<AWieldable*> Inventory;
+
+	UPROPERTY(EditAnywhere)
+	TArray<AWieldable*> CraftingInventory;
 
 	UStaticMeshComponent* CopyMesh;
 
