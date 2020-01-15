@@ -94,7 +94,7 @@ TArray<FItemCrafting> AUltraMinecraftGameMode::GetAvailableCrafting()
 {
 	TArray<FItemCrafting> CraftingArray;
 
-	for (auto item : CraftingDataTable->RowMap)
+	for (auto& item : CraftingDataTable->RowMap)
 	{
 		CraftingArray.Add(*(FItemCrafting*)(item.Value));
 	}

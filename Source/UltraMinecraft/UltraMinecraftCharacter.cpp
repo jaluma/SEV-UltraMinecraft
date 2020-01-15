@@ -183,22 +183,37 @@ AWieldable* AUltraMinecraftCharacter::GetItemByIndex(int32 Index)
 bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 {
 	if (Item != nullptr) {
- 		const int32 AvailableSlot = Inventory.Find(nullptr);
-		if (AvailableSlot != INDEX_NONE) {
-			Inventory[AvailableSlot] = Item;
-			// Update mesh if it's change
-			if (Inventory[CurrentInventorySlot] != NULL && Inventory[CurrentInventorySlot]->WieldableMesh != nullptr) {
-				UpdateWieldedItem();
+		// CHECK if available slot
+		bool isAvailable = false;
+		for (int i = 0; i < NUM_OF_INVENTORY_SLOTS; i++) {
+			if (Inventory[i] == nullptr) {
+				isAvailable = true;
+				break;
 			}
-			return true;
 		}
+		if (isAvailable) {
+			const int32 AvailableSlot = Inventory.Find(nullptr);
+			if (AvailableSlot != INDEX_NONE) {
+				Inventory[AvailableSlot] = Item;
+				// Update mesh if it's change
+				if (Inventory[CurrentInventorySlot] != NULL && Inventory[CurrentInventorySlot]->WieldableMesh != nullptr) {
+					UpdateWieldedItem();
+				}
+				return true;
+			}
+		}
+ 		
 	}
 	return false;
 }
 
 bool AUltraMinecraftCharacter::AddItemToCraftingTableAt(int32 Index)
 {
-	return AddItemToCraftingTableAt(Index, false);
+	if (Index >= 0 && Index < NUM_OF_CRAFTING_INVENTORY_SLOTS) {
+		AddItemToCraft(Index);
+		return true;
+	}
+	return false;
 }
 
 void AUltraMinecraftCharacter::GetCraftingItem()
@@ -209,24 +224,6 @@ void AUltraMinecraftCharacter::GetCraftingItem()
 	}
 	// reset crafting table
 	CraftingInventory.Init(nullptr, NUM_OF_CRAFTING_INVENTORY_SLOTS);
-}
-
-bool AUltraMinecraftCharacter::AddItemToCraftingTableAt(int32 Index, bool bReturnEdit)
-{
-	if (Index != NULL && Index >= 0 && Index < NUM_OF_CRAFTING_INVENTORY_SLOTS) {
-		if (Index == NUM_OF_CRAFTING_INVENTORY_SLOTS - 1) {
-			if (bReturnEdit) {
-				// read and write
-				AddItemToCraft(Index);
-				return true;
-			}
-		}
-		else {
-			AddItemToCraft(Index);
-			return true;
-		}
-	}
-	return false;
 }
 
 void AUltraMinecraftCharacter::AddItemToCraft(int32 Index) {
@@ -247,23 +244,22 @@ void AUltraMinecraftCharacter::AddItemToCraft(int32 Index) {
 void AUltraMinecraftCharacter::UpdatePossiblyCraft()
 {
 	AUltraMinecraftGameMode * mymode = Cast<AUltraMinecraftGameMode>(GetWorld()->GetAuthGameMode());
-	for (auto c : mymode->GetAvailableCrafting()) {
+	for (FItemCrafting c : mymode->GetAvailableCrafting()) {
 		if (
-			//CheckCraftCorrect(0, c.Item1) && 
-			CheckCraftCorrect(1, c.Item2)
-			//&&
-			//CheckCraftCorrect(2, c.Item3) && CheckCraftCorrect(3, c.Item4) &&
-			//CheckCraftCorrect(4, c.Item5) && CheckCraftCorrect(5, c.Item6) &&
-			//CheckCraftCorrect(6, c.Item7) && CheckCraftCorrect(7, c.Item8) &&
-			//CheckCraftCorrect(8, c.Item9)
+			
+			CheckCraftCorrect(0, c.Item1) && CheckCraftCorrect(1, c.Item2) &&
+			CheckCraftCorrect(2, c.Item3) && CheckCraftCorrect(3, c.Item4) &&
+			CheckCraftCorrect(4, c.Item5) && CheckCraftCorrect(5, c.Item6) &&
+			CheckCraftCorrect(6, c.Item7) && CheckCraftCorrect(7, c.Item8) &&
+			CheckCraftCorrect(8, c.Item9)
 			) {
 
+			// destroy before crafted item if it wasn't selected
 			if (CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] != nullptr) {
 				CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1]->Destroy();
 			}
 
-			AWieldable* WieldableObject = Cast<AWieldable>(
-				mymode->SpawnBlueprintFromPath(GetWorld(), c.Return, FVector(0.f, 0.f, 0.f), FRotator::ZeroRotator));
+			AWieldable* WieldableObject = Cast<AWieldable>(mymode->SpawnBlueprintFromPath(GetWorld(), c.Return, FVector(0.f, 0.f, 0.f), FRotator::ZeroRotator));
 			WieldableObject->IsActive = false;
 			CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] = WieldableObject;
 
@@ -272,9 +268,9 @@ void AUltraMinecraftCharacter::UpdatePossiblyCraft()
 	}
 }
 
-bool AUltraMinecraftCharacter::CheckCraftCorrect(int32 Index, FString Item)
+bool AUltraMinecraftCharacter::CheckCraftCorrect(int32 Index, FString& Item)
 {
-	return CraftingInventory[Index] == nullptr && Item.IsEmpty() || Item.Equals(CraftingInventory[Index]->ClassName);
+	return (CraftingInventory[Index] == NULL && Item.IsEmpty()) || (CraftingInventory[Index] != NULL && Item.Equals(CraftingInventory[Index]->ClassName));
 }
 
 UTexture2D* AUltraMinecraftCharacter::GetThumnailAtInventorySlot(int32 Slot)

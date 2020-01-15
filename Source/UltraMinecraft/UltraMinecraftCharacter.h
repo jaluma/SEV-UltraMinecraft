@@ -224,13 +224,11 @@ private:
 	/* Called when we want to break a block */
 	void BreakBlock();
 
-	bool AddItemToCraftingTableAt(int32 Index, bool bReturnEdit);
-
 	void AddItemToCraft(int32 Index);
 
 	void UpdatePossiblyCraft();
 
-	bool CheckCraftCorrect(int32 Index, FString Item);
+	bool CheckCraftCorrect(int32 Index, FString& Item);
 
 	/* Reference to block in front*/
 	ABlock* CurrentBlock;
