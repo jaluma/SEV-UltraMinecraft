@@ -28,7 +28,13 @@ AWieldable::AWieldable()
 void AWieldable::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (ToolType == ETool::Block) {
+		Cast<UPrimitiveComponent>(GetRootComponent())->SetSimulatePhysics(true);
+	}
+
+	SetActorEnableCollision(false);
+
 }
 
 // Called every frame
