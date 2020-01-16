@@ -263,9 +263,15 @@ void AUltraMinecraftCharacter::UpdatePossiblyCraft()
 			WieldableObject->IsActive = false;
 			CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] = WieldableObject;
 
-			break;
+			return;
 		}
 	}
+
+	if (CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] != nullptr) {
+		CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1]->Destroy();
+	}
+
+	return;
 }
 
 bool AUltraMinecraftCharacter::CheckCraftCorrect(int32 Index, FString& Item)
@@ -476,6 +482,7 @@ AWieldable * AUltraMinecraftCharacter::GetCurrentWieldedItem()
 void AUltraMinecraftCharacter::Throw()
 {
 	AWieldable* ItemToThrow = GetCurrentWieldedItem();
+	Throw(ItemToThrow);
 }
 
 void AUltraMinecraftCharacter::Throw(AWieldable* ItemToThrow)
