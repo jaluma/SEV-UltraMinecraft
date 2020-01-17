@@ -21,6 +21,12 @@ ABlock::ABlock()
 	CollisionMesh->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	CollisionMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 
+
+	//// check collision mesh to relative positio.
+	//FVector Vector = FVector(0, 0, 0);
+
+	//CollisionMesh->SetRelativeTransform(FTransform(Vector));
+
 	// Replace in Blueprint class
 	Resistance = 20.f;
 	BreakingStage = 0.f;
@@ -31,7 +37,6 @@ ABlock::ABlock()
 void ABlock::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void ABlock::Break()
@@ -72,9 +77,9 @@ void ABlock::OnBroken(bool HasRequiredTool)
 	FVector SpawnLocation = GetActorLocation();
 	TSubclassOf<class AWieldable> ClassType = WieldableType;
 
-	Destroy();
+	;
 
-	if (ClassType != NULL) {
+	if (Destroy() && ClassType != NULL) {
 		GetWorld()->SpawnActor<AWieldable>(ClassType, SpawnLocation, FRotator::ZeroRotator);
 	}
 }

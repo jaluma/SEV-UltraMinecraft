@@ -33,7 +33,7 @@ void AWieldable::BeginPlay()
 		Cast<UPrimitiveComponent>(GetRootComponent())->SetSimulatePhysics(true);
 	}
 
-	SetActorEnableCollision(false);
+	WieldableMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 
 }
 
@@ -53,8 +53,8 @@ void AWieldable::OnRadiusEnter(UPrimitiveComponent* OverlappedComp, AActor* Othe
 		AUltraMinecraftCharacter* Character = Cast<AUltraMinecraftCharacter>(OtherActor);
 		if (Character != nullptr) {
 			if (Character->AddItemToInventory(this)) {
-				//Hide(true);
-				OnUsed();
+				Hide(true);
+				//OnUsed();
 			}
 		}
 	}

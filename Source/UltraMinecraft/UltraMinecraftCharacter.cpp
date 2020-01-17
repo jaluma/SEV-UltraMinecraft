@@ -123,6 +123,12 @@ void AUltraMinecraftCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	CheckForBlocks();
+
+	// Check if he died
+	if (PlayerHealth < 0) {
+		FString IntAsString = FString::FromInt(PlayerHealth);
+		GEngine->AddOnScreenDebugMessage(5, 5.f, FColor::Yellow, IntAsString);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -195,6 +201,8 @@ bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 			const int32 AvailableSlot = Inventory.Find(nullptr);
 			if (AvailableSlot != INDEX_NONE) {
 				Inventory[AvailableSlot] = Item;
+				Item->Hide(true);
+
 				// Update mesh if it's change
 				if (Inventory[CurrentInventorySlot] != NULL && Inventory[CurrentInventorySlot]->WieldableMesh != nullptr) {
 					UpdateWieldedItem();
@@ -297,7 +305,7 @@ UTexture2D* AUltraMinecraftCharacter::GetThumnailAtCraftingInventorySlot(int32 S
 
 bool AUltraMinecraftCharacter::DecPlayerHealth(int32 Dec)
 {
-	if (PlayerHealth - Dec > 0) {
+	if (PlayerHealth - Dec >= -Dec) {
 		PlayerHealth -= Dec;
 		return true;
 	}
@@ -507,9 +515,7 @@ void AUltraMinecraftCharacter::Throw(AWieldable* ItemToThrow)
 		if (World != NULL) {
 			ItemToThrow->SetActorLocationAndRotation(DropLocation, FRotator::ZeroRotator);
 			ItemToThrow->Hide(false); 
-			//ItemToThrow->Destroy();
 
-			ItemToThrow->IsActive = true;
 			Inventory[CurrentInventorySlot] = NULL;
 			UpdateWieldedItem();
 		}
