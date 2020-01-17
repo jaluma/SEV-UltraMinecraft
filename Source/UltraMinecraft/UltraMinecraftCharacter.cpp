@@ -277,6 +277,7 @@ void AUltraMinecraftCharacter::UpdatePossiblyCraft()
 
 	if (CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] != nullptr) {
 		CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1]->Destroy();
+		CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] = nullptr;
 	}
 
 	return;
