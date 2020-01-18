@@ -21,6 +21,8 @@ ABlock::ABlock()
 	CollisionMesh->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	CollisionMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 
+	static ConstructorHelpers::FObjectFinder<USoundCue> breakSound(TEXT("/Game/Assets/Sound/Effect/Break/Break_Cue.Break_Cue"));
+	BreakSound = breakSound.Object;
 
 	//// check collision mesh to relative positio.
 	//FVector Vector = FVector(0, 0, 0);
@@ -84,6 +86,16 @@ void ABlock::OnBroken(bool HasRequiredTool)
 	TSubclassOf<class AWieldable> ClassType = WieldableType;
 
 	if (Destroy() && ClassType != NULL && HasRequiredTool) {
+		PlaySound(SpawnLocation);
 		GetWorld()->SpawnActor<AWieldable>(ClassType, SpawnLocation, FRotator::ZeroRotator);
+	}
+}
+
+void ABlock::PlaySound(FVector SpawnLocation)
+{
+	// try and play the sound if specified
+	if (BreakSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, BreakSound, SpawnLocation);
 	}
 }

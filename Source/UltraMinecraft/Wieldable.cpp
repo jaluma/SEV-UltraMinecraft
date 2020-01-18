@@ -21,6 +21,13 @@ AWieldable::AWieldable()
 	PickupTrigger->SetRelativeLocation(FVector(0, 0, 0));
 	PickupTrigger->SetRelativeScale3D(FVector(10, 10, 10));
 
+	static ConstructorHelpers::FObjectFinder<USoundCue> dropSound(TEXT("/Game/Assets/Sound/Effect/Wieldable/Overlap_Cue.Overlap_Cue"));
+	DropSound = dropSound.Object;
+
+	//DropAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	//DropAudioComponent->bAutoActivate = false;
+	//DropAudioComponent->SetupAttachment(GetRootComponent(), TEXT("Audio"));
+
 	MaterialType = EMaterial::None;
 	ToolType = ETool::Unarmed;
 	IsActive = true;
@@ -57,6 +64,8 @@ void AWieldable::OnRadiusEnter(UPrimitiveComponent* OverlappedComp, AActor* Othe
 			if (Character->AddItemToInventory(this)) {
 				Hide(true);
 				//OnUsed();
+
+				PlaySound();
 			}
 		}
 	}
@@ -71,5 +80,14 @@ void AWieldable::Hide(bool bVis)
 void AWieldable::OnUsed()
 {
 	Destroy();
+}
+
+void AWieldable::PlaySound()
+{
+	// try and play the sound if specified
+	if (DropSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DropSound, GetActorLocation());
+	}
 }
 

@@ -90,6 +90,9 @@ AUltraMinecraftCharacter::AUltraMinecraftCharacter()
 	Reach = 400;
 	InitialPlayerHealth = 10;
 	PlayerHealth = InitialPlayerHealth;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> hitSound(TEXT("/Game/Assets/Sound/Effect/Hit/Hit_Cue.Hit_Cue"));
+	HitSound = hitSound.Object;
 }
 
 void AUltraMinecraftCharacter::BeginPlay()

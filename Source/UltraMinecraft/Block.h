@@ -43,9 +43,14 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	float BreakingStage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundCue* BreakSound;
+
 	void Break();
 
 	void ResetBlock();
 
 	void OnBroken(bool HasRequiredTool);
+
+	void PlaySound(FVector SpawnLocation);
 };

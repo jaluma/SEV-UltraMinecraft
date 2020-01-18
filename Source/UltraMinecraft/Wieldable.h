@@ -70,7 +70,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString ClassName;
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//UAudioComponent* DropAudioComponent;
+
 	bool IsActive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundCue* DropSound;
 
 	UFUNCTION()
 	void OnRadiusEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -78,4 +84,6 @@ public:
 	void Hide(bool bVis);
 
 	void OnUsed();
+
+	void PlaySound();
 };

@@ -90,6 +90,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	int32 PlayerHealth;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+	USoundCue* HitSound;
+
 	/* Get current index */
 	UFUNCTION(BlueprintPure, Category = HUD)
 	int32 GetCurrentInventorySlot();
