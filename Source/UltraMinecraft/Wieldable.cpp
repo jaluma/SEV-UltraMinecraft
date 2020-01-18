@@ -17,7 +17,9 @@ AWieldable::AWieldable()
 
 	PickupTrigger->bGenerateOverlapEvents = true;
 	PickupTrigger->OnComponentBeginOverlap.AddDynamic(this, &AWieldable::OnRadiusEnter);
-	PickupTrigger->AttachToComponent(WieldableMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("FP_WieldItem"));
+	PickupTrigger->SetupAttachment(WieldableMesh, TEXT("FP_WieldItem"));
+	PickupTrigger->SetRelativeLocation(FVector(0, 0, 0));
+	PickupTrigger->SetRelativeScale3D(FVector(10, 10, 10));
 
 	MaterialType = EMaterial::None;
 	ToolType = ETool::Unarmed;

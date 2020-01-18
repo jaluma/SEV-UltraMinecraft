@@ -30,6 +30,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 MinimumMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 RequiredType;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Resistance;

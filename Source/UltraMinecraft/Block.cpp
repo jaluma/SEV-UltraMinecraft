@@ -31,6 +31,7 @@ ABlock::ABlock()
 	Resistance = 20.f;
 	BreakingStage = 0.f;
 	MinimumMaterial = 0;
+	RequiredType = 0;
 }
 
 // Called when the game starts or when spawned
@@ -41,24 +42,29 @@ void ABlock::BeginPlay()
 
 void ABlock::Break()
 {
-	// check if character using minimum tool
-	AUltraMinecraftCharacter* Character = Cast<AUltraMinecraftCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	uint8 MaterialType = Character->ToolMaterial;
+	++BreakingStage;
+	float CrackingValue = 1.0f - (BreakingStage / 5.f);
 
-	if (MinimumMaterial < MaterialType) {
-		++BreakingStage;
-		float CrackingValue = 1.0f - (BreakingStage / 5.f);
+	UMaterialInstanceDynamic* MatInstance = SM_Block->CreateDynamicMaterialInstance(0);
 
-		UMaterialInstanceDynamic* MatInstance = SM_Block->CreateDynamicMaterialInstance(0);
+	if (MatInstance != nullptr) {
+		MatInstance->SetScalarParameterValue(FName("CrackingValue"), CrackingValue);
+	}
 
-		if (MatInstance != nullptr) {
-			MatInstance->SetScalarParameterValue(FName("CrackingValue"), CrackingValue);
+	// it's broken
+	if (BreakingStage == 5.f) {
+		// check if character using minimum tool
+		AUltraMinecraftCharacter* Character = Cast<AUltraMinecraftCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		uint8 ToolMaterial = Character->ToolMaterial;
+		uint8 ToolType = Character->ToolType;
+
+		bool HasRequiredTool = ToolMaterial > MinimumMaterial;
+
+		if (RequiredType != 0) {
+			HasRequiredTool = HasRequiredTool && ToolType == RequiredType;
 		}
 
-		// it's broken
-		if (BreakingStage == 5.f) {
-			OnBroken(true);
-		}
+		OnBroken(HasRequiredTool);
 	}
 }
 
@@ -77,9 +83,7 @@ void ABlock::OnBroken(bool HasRequiredTool)
 	FVector SpawnLocation = GetActorLocation();
 	TSubclassOf<class AWieldable> ClassType = WieldableType;
 
-	;
-
-	if (Destroy() && ClassType != NULL) {
+	if (Destroy() && ClassType != NULL && HasRequiredTool) {
 		GetWorld()->SpawnActor<AWieldable>(ClassType, SpawnLocation, FRotator::ZeroRotator);
 	}
 }
