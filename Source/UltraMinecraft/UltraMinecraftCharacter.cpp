@@ -150,8 +150,8 @@ void AUltraMinecraftCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	PlayerInputComponent->BindAction("PutBlocks", IE_Pressed, this, &AUltraMinecraftCharacter::Put);
 	
 	PlayerInputComponent->BindAction("Inventary", IE_Pressed, this, &AUltraMinecraftCharacter::ShowHideCrafting);
-	PlayerInputComponent->BindAction("InventoryDown", IE_Pressed, this, &AUltraMinecraftCharacter::MoveUpInventorySlot);
-	PlayerInputComponent->BindAction("InventoryUp", IE_Pressed, this, &AUltraMinecraftCharacter::MoveDownInventorySlot);
+	PlayerInputComponent->BindAction("InventoryDown", IE_Pressed, this, &AUltraMinecraftCharacter::MoveDownInventorySlot);
+	PlayerInputComponent->BindAction("InventoryUp", IE_Pressed, this, &AUltraMinecraftCharacter::MoveUpInventorySlot);
 
 	//InputComponent->BindTouch(EInputEvent::IE_Pressed, this, &AUltraMinecraftCharacter::TouchStarted);
 	if (EnableTouchscreenMovement(PlayerInputComponent) == false)
@@ -596,18 +596,18 @@ void AUltraMinecraftCharacter::ShowHideCrafting()
 
 void AUltraMinecraftCharacter::MoveDownInventorySlot()
 {
-	CurrentInventorySlot--;
-	if (CurrentInventorySlot < 0) {
-		CurrentInventorySlot = NUM_OF_INVENTORY_SLOTS - 1;
+	CurrentInventorySlot++;
+	if (CurrentInventorySlot >= NUM_OF_INVENTORY_SLOTS) {
+		CurrentInventorySlot = 0;
 	}
 	UpdateWieldedItem();
 }
 
 void AUltraMinecraftCharacter::MoveUpInventorySlot()
 {
-	CurrentInventorySlot++;
-	if (CurrentInventorySlot >= NUM_OF_INVENTORY_SLOTS) {
-		CurrentInventorySlot = 0;
+	CurrentInventorySlot--;
+	if (CurrentInventorySlot < 0) {
+		CurrentInventorySlot = NUM_OF_INVENTORY_SLOTS - 1;
 	}
 	UpdateWieldedItem();
 }

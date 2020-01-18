@@ -129,6 +129,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = Crafting)
 	UTexture2D* GetThumnailAtCraftingInventorySlot(int32 Slot);
 
+	/* Change Selected Inventory Slot  */
+	UFUNCTION(BlueprintCallable, Category = HUDIngame)
+	void MoveUpInventorySlot();
+
+	UFUNCTION(BlueprintCallable, Category = HUDIngame)
+	void MoveDownInventorySlot();
+
 	uint8 ToolType;
 	uint8 ToolMaterial;
 
@@ -206,10 +213,6 @@ private:
 
 	/* Show or hide Crafting HUD*/
 	void ShowHideCrafting();
-
-	/* Change Selected Inventory Slot  */
-	void MoveUpInventorySlot();
-	void MoveDownInventorySlot();
 
 	/* Value of player is breaking a block*/
 	bool bIsBreaking;
