@@ -126,12 +126,6 @@ void AUltraMinecraftCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	CheckForBlocks();
-
-	// Check if he died
-	if (PlayerHealth < 0) {
-		FString IntAsString = FString::FromInt(PlayerHealth);
-		GEngine->AddOnScreenDebugMessage(5, 5.f, FColor::Yellow, IntAsString);
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -214,6 +208,18 @@ bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 			}
 		}
  		
+	}
+	return false;
+}
+
+bool AUltraMinecraftCharacter::HaveWieldableItemInInventory(TSubclassOf<class AWieldable> classType)
+{
+	if (classType != NULL) {
+		for (int i = 0; i < NUM_OF_INVENTORY_SLOTS; i++) {
+			if (Inventory[i] != nullptr && Inventory[i]->GetClass() == classType.Get()) {
+				return true;
+			}
+		}
 	}
 	return false;
 }

@@ -105,11 +105,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool AddItemToInventory(AWieldable* Item);
 
+	UFUNCTION(BlueprintPure, Category = Inventory)
+	bool HaveWieldableItemInInventory(TSubclassOf<class AWieldable> classType);
+
 	/* Get Current inventory slot */
 	UFUNCTION(BlueprintPure, Category = Inventory)
 	UTexture2D* GetThumnailAtInventorySlot(int32 Slot);
 
-	UFUNCTION(BlueprintPure, Category = Inventory)
+	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool DecPlayerHealth(int32 Dec);
 
 	UFUNCTION(BlueprintPure, Category = Inventory)
