@@ -93,6 +93,9 @@ AUltraMinecraftCharacter::AUltraMinecraftCharacter()
 
 	static ConstructorHelpers::FObjectFinder<USoundCue> hitSound(TEXT("/Game/Assets/Sound/Effect/Hit/Hit_Cue.Hit_Cue"));
 	HitSound = hitSound.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundCue> putSound(TEXT("/Game/Assets/Sound/Effect/Put/Put_Cue.Put_Cue"));
+	PutSound = putSound.Object;
 }
 
 void AUltraMinecraftCharacter::BeginPlay()
@@ -299,7 +302,7 @@ bool AUltraMinecraftCharacter::CheckCraftCorrect(int32 Index, FString& Item)
 
 UTexture2D* AUltraMinecraftCharacter::GetThumnailAtInventorySlot(int32 Slot)
 {
-	if (Inventory[Slot] != NULL) {
+	if (Slot >= 0 && Slot < NUM_OF_INVENTORY_SLOTS && Inventory[Slot] != NULL) {
 		return Inventory[Slot]->PickupThumbnail;
 	}
 	return nullptr;
@@ -307,7 +310,7 @@ UTexture2D* AUltraMinecraftCharacter::GetThumnailAtInventorySlot(int32 Slot)
 
 UTexture2D* AUltraMinecraftCharacter::GetThumnailAtCraftingInventorySlot(int32 Slot)
 {
-	if (CraftingInventory[Slot] != NULL) {
+	if (Slot >= 0 && Slot < NUM_OF_CRAFTING_INVENTORY_SLOTS && CraftingInventory[Slot] != NULL) {
 		return CraftingInventory[Slot]->PickupThumbnail;
 	}
 	return nullptr;
@@ -317,6 +320,10 @@ bool AUltraMinecraftCharacter::DecPlayerHealth(int32 Dec)
 {
 	if (PlayerHealth - Dec >= -Dec) {
 		PlayerHealth -= Dec;
+		if (HitSound != nullptr)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+		}
 		return true;
 	}
 	return false;
@@ -330,6 +337,21 @@ int32 AUltraMinecraftCharacter::GetInitialHealth()
 int32 AUltraMinecraftCharacter::GetHealth()
 {
 	return PlayerHealth;
+}
+
+bool AUltraMinecraftCharacter::IsHoldingWieldableItem(TSubclassOf<class AWieldable> classType)
+{
+	AWieldable* Wieldable = GetCurrentWieldedItem();
+
+	if (classType == nullptr || Wieldable == nullptr) {
+		return false;
+	}
+
+	if (Wieldable->GetClass() == classType.Get()) {
+		return true;
+	}
+
+	return false;
 }
 
 void AUltraMinecraftCharacter::OnFire()
@@ -577,6 +599,11 @@ void AUltraMinecraftCharacter::Put()
 				ActorSpawnParams.bNoFail = true;
 
 				ABlock* Block = Cast<ABlock>(World->SpawnActor<AActor>(ItemToPut->BlockType, DropLocation, FRotator::ZeroRotator));
+
+				if (PutSound != nullptr)
+				{
+					UGameplayStatics::PlaySoundAtLocation(this, PutSound, GetActorLocation());
+				}
 
 				//ItemToPut->Hide(true);
 				ItemToPut->Destroy();

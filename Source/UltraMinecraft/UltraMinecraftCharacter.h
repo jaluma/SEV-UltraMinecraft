@@ -93,6 +93,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
 	USoundCue* HitSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Sound)
+	USoundCue* PutSound;
+
 	/* Get current index */
 	UFUNCTION(BlueprintPure, Category = HUD)
 	int32 GetCurrentInventorySlot();
@@ -120,6 +123,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = Inventory)
 	int32 GetHealth();
+
+	UFUNCTION(BlueprintPure, Category = Inventory)
+	bool IsHoldingWieldableItem(TSubclassOf<class AWieldable> classType);
 
 	/* Add item to crafting */
 	UFUNCTION(BlueprintCallable, Category = Crafting)
