@@ -70,10 +70,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString ClassName;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsStackeable;
+
+	bool IncNumStack(int32 Inc = 1);
+
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//UAudioComponent* DropAudioComponent;
 
 	bool IsActive;
+
+	int NumberStack;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundCue* DropSound;
@@ -85,5 +92,10 @@ public:
 
 	void OnUsed();
 
+	bool IsSlotFree(int32 Inc = 1);
+
 	void PlaySound();
+
+private:
+	const int32 NUM_OF_MAX_STACK = 3;
 };

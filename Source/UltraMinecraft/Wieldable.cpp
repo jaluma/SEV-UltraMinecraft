@@ -31,6 +31,9 @@ AWieldable::AWieldable()
 	MaterialType = EMaterial::None;
 	ToolType = ETool::Unarmed;
 	IsActive = true;
+
+	IsStackeable = true;
+	NumberStack = 0;
 }
 
 // Called when the game starts or when spawned
@@ -54,6 +57,15 @@ void AWieldable::Tick(float DeltaTime)
 	FRotator rotation = WieldableMesh->GetComponentRotation();
 	rotation.Yaw += 1.0f;
 	WieldableMesh->SetRelativeRotation(rotation);
+}
+
+bool AWieldable::IncNumStack(int32 Inc)
+{
+	if (IsStackeable && NumberStack < NUM_OF_MAX_STACK - Inc) {
+		NumberStack++;
+		return true;
+	}
+	return false;
 }
 
 void AWieldable::OnRadiusEnter(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -80,6 +92,11 @@ void AWieldable::Hide(bool bVis)
 void AWieldable::OnUsed()
 {
 	Destroy();
+}
+
+bool AWieldable::IsSlotFree(int32 Inc)
+{
+	return IsStackeable && NumberStack + Inc < NUM_OF_MAX_STACK;
 }
 
 void AWieldable::PlaySound()

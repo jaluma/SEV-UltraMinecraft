@@ -191,23 +191,40 @@ bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 	if (Item != nullptr) {
 		// CHECK if available slot
 		bool isAvailable = false;
+		int IndexItem = -1;
 		for (int i = 0; i < NUM_OF_INVENTORY_SLOTS; i++) {
 			if (Inventory[i] == nullptr) {
 				isAvailable = true;
-				break;
+			}
+			if (Inventory[i] != nullptr && Item->GetClass() == Inventory[i]->GetClass() && Inventory[i]->IsSlotFree()) {
+				if (IndexItem == -1) {
+					IndexItem = i;
+					isAvailable = true;
+				}
 			}
 		}
 		if (isAvailable) {
-			const int32 AvailableSlot = Inventory.Find(nullptr);
-			if (AvailableSlot != INDEX_NONE) {
-				Inventory[AvailableSlot] = Item;
-				Item->Hide(true);
+			if (IndexItem != -1 && Inventory[IndexItem]->IncNumStack(1)) {
+				Item->Destroy();
 
 				// Update mesh if it's change
 				if (Inventory[CurrentInventorySlot] != NULL && Inventory[CurrentInventorySlot]->WieldableMesh != nullptr) {
 					UpdateWieldedItem();
 				}
 				return true;
+			}
+			else {
+				const int32 AvailableSlot = Inventory.Find(nullptr);
+				if (AvailableSlot != INDEX_NONE) {
+					Inventory[AvailableSlot] = Item;
+					Item->Hide(true);
+
+					// Update mesh if it's change
+					if (Inventory[CurrentInventorySlot] != NULL && Inventory[CurrentInventorySlot]->WieldableMesh != nullptr) {
+						UpdateWieldedItem();
+					}
+					return true;
+				}
 			}
 		}
  		
@@ -306,6 +323,19 @@ UTexture2D* AUltraMinecraftCharacter::GetThumnailAtInventorySlot(int32 Slot)
 		return Inventory[Slot]->PickupThumbnail;
 	}
 	return nullptr;
+}
+
+int32 AUltraMinecraftCharacter::GetNumStackAtInventorySlot(int32 Slot)
+{
+	if (IsStackeableAtInventorySlot(Slot)) {
+		return Inventory[Slot]->NumberStack;
+	}
+	return 0;
+}
+
+bool AUltraMinecraftCharacter::IsStackeableAtInventorySlot(int32 Slot)
+{
+	return Slot >= 0 && Slot < NUM_OF_INVENTORY_SLOTS && Inventory[Slot] != NULL && Inventory[Slot]->IsStackeable;
 }
 
 UTexture2D* AUltraMinecraftCharacter::GetThumnailAtCraftingInventorySlot(int32 Slot)

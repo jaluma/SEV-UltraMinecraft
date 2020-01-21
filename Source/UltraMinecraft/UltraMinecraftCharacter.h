@@ -115,6 +115,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = Inventory)
 	UTexture2D* GetThumnailAtInventorySlot(int32 Slot);
 
+	UFUNCTION(BlueprintPure, Category = Inventory)
+	int32 GetNumStackAtInventorySlot(int32 Slot);
+
+	UFUNCTION(BlueprintPure, Category = Inventory)
+	bool IsStackeableAtInventorySlot(int32 Slot);
+
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	bool DecPlayerHealth(int32 Dec);
 
