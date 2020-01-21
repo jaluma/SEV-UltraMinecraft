@@ -88,7 +88,7 @@ AUltraMinecraftCharacter::AUltraMinecraftCharacter()
 	CraftingInventory.Init(nullptr, NUM_OF_CRAFTING_INVENTORY_SLOTS);
 
 	Reach = 400;
-	InitialPlayerHealth = 10;
+	InitialPlayerHealth = 20;
 	PlayerHealth = InitialPlayerHealth;
 
 	static ConstructorHelpers::FObjectFinder<USoundCue> hitSound(TEXT("/Game/Assets/Sound/Effect/Hit/Hit_Cue.Hit_Cue"));
