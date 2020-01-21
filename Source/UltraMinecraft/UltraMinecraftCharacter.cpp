@@ -196,7 +196,7 @@ bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 			if (Inventory[i] == nullptr) {
 				isAvailable = true;
 			}
-			if (Inventory[i] != nullptr && Item->GetClass() == Inventory[i]->GetClass() && Inventory[i]->IsSlotFree()) {
+			if (Inventory[i] != nullptr && Item->GetClass() == Inventory[i]->GetClass() && Inventory[i]->IsSlotFree(1)) {
 				if (IndexItem == -1) {
 					IndexItem = i;
 					isAvailable = true;
@@ -207,7 +207,7 @@ bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 			if (IndexItem != -1 && Inventory[IndexItem]->IncNumStack(1)) {
 				Item->Destroy();
 
-				// Update mesh if it's change
+				// Update mesh if it's changed
 				if (Inventory[CurrentInventorySlot] != NULL && Inventory[CurrentInventorySlot]->WieldableMesh != nullptr) {
 					UpdateWieldedItem();
 				}
@@ -219,7 +219,7 @@ bool AUltraMinecraftCharacter::AddItemToInventory(AWieldable * Item)
 					Inventory[AvailableSlot] = Item;
 					Item->Hide(true);
 
-					// Update mesh if it's change
+					// Update mesh if it's changed
 					if (Inventory[CurrentInventorySlot] != NULL && Inventory[CurrentInventorySlot]->WieldableMesh != nullptr) {
 						UpdateWieldedItem();
 					}
@@ -265,14 +265,40 @@ void AUltraMinecraftCharacter::GetCraftingItem()
 
 void AUltraMinecraftCharacter::AddItemToCraft(int32 Index) {
 	if (CraftingInventory[Index] == nullptr) {
-		CraftingInventory[Index] = Inventory[CurrentInventorySlot];
-		Inventory[CurrentInventorySlot] = nullptr;
+		if (Inventory[CurrentInventorySlot] != nullptr && Inventory[CurrentInventorySlot]->IsStackeable && Inventory[CurrentInventorySlot]->NumberStack > 0) {
+			Inventory[CurrentInventorySlot]->IncNumStack(-1);
+			AWieldable* Wieldable = Cast<AWieldable>(GetWorld()->SpawnActor<AActor>(Inventory[CurrentInventorySlot]->GetClass(), FVector(0,0,0), FRotator::ZeroRotator));
+			Wieldable->Hide(true);
+			CraftingInventory[Index] = Wieldable;
+		}
+		else {
+			CraftingInventory[Index] = Inventory[CurrentInventorySlot];
+			Inventory[CurrentInventorySlot] = nullptr;
+		}
 	}
 	else {
 		// swap crafting item by inventory item
-		AWieldable* Temp = Inventory[CurrentInventorySlot];
-		Inventory[CurrentInventorySlot] = CraftingInventory[Index];
-		CraftingInventory[Index] = Temp;
+		if (Inventory[CurrentInventorySlot] != nullptr
+			&& Inventory[CurrentInventorySlot]->IsStackeable && Inventory[CurrentInventorySlot]->NumberStack > 0
+			&& Inventory[CurrentInventorySlot]->GetClass() != CraftingInventory[Index]->GetClass()) {
+			AWieldable* Wieldable = Cast<AWieldable>(GetWorld()->SpawnActor<AActor>(Inventory[CurrentInventorySlot]->GetClass(), FVector(0, 0, 0), FRotator::ZeroRotator));
+			Wieldable->Hide(true);
+			Inventory[CurrentInventorySlot]->IncNumStack(-1);
+			AddItemToInventory(CraftingInventory[Index]);
+			CraftingInventory[Index] = Wieldable;
+		}
+		else {
+			if (Inventory[CurrentInventorySlot] != nullptr
+				&& Inventory[CurrentInventorySlot]->IsStackeable && Inventory[CurrentInventorySlot]->GetClass() == CraftingInventory[Index]->GetClass()) {
+				AddItemToInventory(CraftingInventory[Index]);
+				CraftingInventory[Index] = nullptr;
+			}
+			else {
+				AWieldable* Temp = Inventory[CurrentInventorySlot];
+				Inventory[CurrentInventorySlot] = CraftingInventory[Index];
+				CraftingInventory[Index] = Temp;
+			}
+		}
 	}
 	UpdateWieldedItem();
 	UpdatePossiblyCraft();
@@ -575,11 +601,21 @@ void AUltraMinecraftCharacter::Throw(AWieldable* ItemToThrow)
 	if (ItemToThrow != nullptr) {
 		UWorld* const World = GetWorld();
 		if (World != NULL) {
-			ItemToThrow->SetActorLocationAndRotation(DropLocation, FRotator::ZeroRotator);
-			ItemToThrow->Hide(false); 
+			if (ItemToThrow->IsStackeable && ItemToThrow->NumberStack > 0) {
+				ItemToThrow->IncNumStack(-1);
 
-			Inventory[CurrentInventorySlot] = NULL;
-			UpdateWieldedItem();
+				// spawn new Wieldable Item
+				AWieldable* Wieldable = Cast<AWieldable>(World->SpawnActor<AActor>(ItemToThrow->GetClass(), DropLocation, FRotator::ZeroRotator));
+			}
+			else {
+				ItemToThrow->SetActorLocationAndRotation(DropLocation, FRotator::ZeroRotator);
+				ItemToThrow->Hide(false);
+
+				if (Inventory[CurrentInventorySlot] == ItemToThrow) {
+					Inventory[CurrentInventorySlot] = nullptr;
+					UpdateWieldedItem();
+				}
+			}
 		}
 	}
 }
@@ -635,11 +671,16 @@ void AUltraMinecraftCharacter::Put()
 					UGameplayStatics::PlaySoundAtLocation(this, PutSound, GetActorLocation());
 				}
 
-				//ItemToPut->Hide(true);
-				ItemToPut->Destroy();
+				if (ItemToPut->IsStackeable && ItemToPut->NumberStack > 0) {
+					ItemToPut->IncNumStack(-1);
+				}
+				else {
+					//ItemToPut->Hide(true);
+					ItemToPut->Destroy();
 
-				Inventory[CurrentInventorySlot] = NULL;
-				UpdateWieldedItem();
+					Inventory[CurrentInventorySlot] = NULL;
+					UpdateWieldedItem();
+				}
 			}
 		}
 	}

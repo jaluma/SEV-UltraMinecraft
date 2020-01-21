@@ -73,7 +73,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsStackeable;
 
-	bool IncNumStack(int32 Inc = 1);
+	bool IncNumStack(int32 Inc);
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	//UAudioComponent* DropAudioComponent;
@@ -92,7 +92,7 @@ public:
 
 	void OnUsed();
 
-	bool IsSlotFree(int32 Inc = 1);
+	bool IsSlotFree(int32 Inc);
 
 	void PlaySound();
 

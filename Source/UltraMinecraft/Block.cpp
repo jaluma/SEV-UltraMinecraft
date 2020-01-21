@@ -60,7 +60,7 @@ void ABlock::Break()
 		uint8 ToolMaterial = Character->ToolMaterial;
 		uint8 ToolType = Character->ToolType;
 
-		bool HasRequiredTool = ToolMaterial > MinimumMaterial;
+		bool HasRequiredTool = ToolMaterial >= MinimumMaterial;
 
 		if (RequiredType != 0) {
 			HasRequiredTool = HasRequiredTool && ToolType == RequiredType;

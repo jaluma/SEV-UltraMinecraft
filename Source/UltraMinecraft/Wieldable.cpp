@@ -62,7 +62,7 @@ void AWieldable::Tick(float DeltaTime)
 bool AWieldable::IncNumStack(int32 Inc)
 {
 	if (IsStackeable && NumberStack < NUM_OF_MAX_STACK - Inc) {
-		NumberStack++;
+		NumberStack+=Inc;
 		return true;
 	}
 	return false;
