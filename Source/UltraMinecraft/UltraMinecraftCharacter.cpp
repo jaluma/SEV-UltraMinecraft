@@ -129,6 +129,11 @@ void AUltraMinecraftCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	CheckForBlocks();
+
+	// check if he is falling in infinite game
+	if (PlayerHealth != 0 && GetActorLocation().Z < -350) {
+		PlayerHealth = 0;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -307,26 +312,29 @@ void AUltraMinecraftCharacter::AddItemToCraft(int32 Index) {
 void AUltraMinecraftCharacter::UpdatePossiblyCraft()
 {
 	AUltraMinecraftGameMode * mymode = Cast<AUltraMinecraftGameMode>(GetWorld()->GetAuthGameMode());
-	for (FItemCrafting c : mymode->GetAvailableCrafting()) {
-		if (
-			
-			CheckCraftCorrect(0, c.Item1) && CheckCraftCorrect(1, c.Item2) &&
-			CheckCraftCorrect(2, c.Item3) && CheckCraftCorrect(3, c.Item4) &&
-			CheckCraftCorrect(4, c.Item5) && CheckCraftCorrect(5, c.Item6) &&
-			CheckCraftCorrect(6, c.Item7) && CheckCraftCorrect(7, c.Item8) &&
-			CheckCraftCorrect(8, c.Item9)
-			) {
+	if (mymode != nullptr) {
+		for (FItemCrafting c : mymode->GetAvailableCrafting()) {
+			if (
+				CheckCraftCorrect(0, c.Item1) && CheckCraftCorrect(1, c.Item2) &&
+				CheckCraftCorrect(2, c.Item3) && CheckCraftCorrect(3, c.Item4) &&
+				CheckCraftCorrect(4, c.Item5) && CheckCraftCorrect(5, c.Item6) &&
+				CheckCraftCorrect(6, c.Item7) && CheckCraftCorrect(7, c.Item8) &&
+				CheckCraftCorrect(8, c.Item9)
+				) {
 
-			// destroy before crafted item if it wasn't selected
-			if (CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] != nullptr) {
-				CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1]->Destroy();
+				// destroy before crafted item if it wasn't selected
+				if (CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] != nullptr) {
+					CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1]->Destroy();
+				}
+
+				AWieldable* WieldableObject = Cast<AWieldable>(mymode->SpawnBlueprintFromPath(GetWorld(), c.Return, FVector(0.f, 0.f, 0.f), FRotator::ZeroRotator));
+				if (WieldableObject != nullptr) {
+					WieldableObject->Hide(true);
+					CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] = WieldableObject;
+				}
+
+				return;
 			}
-
-			AWieldable* WieldableObject = Cast<AWieldable>(mymode->SpawnBlueprintFromPath(GetWorld(), c.Return, FVector(0.f, 0.f, 0.f), FRotator::ZeroRotator));
-			WieldableObject->IsActive = false;
-			CraftingInventory[NUM_OF_CRAFTING_INVENTORY_SLOTS - 1] = WieldableObject;
-
-			return;
 		}
 	}
 
@@ -654,7 +662,7 @@ void AUltraMinecraftCharacter::Put()
 			Impact.Z >= 0 ? zRes : -zRes
 		);
 
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, DropLocation.ToCompactString());
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, DropLocation.ToCompactString());
 
 		if (ItemToPut != nullptr) {
 			UWorld* const World = GetWorld();
@@ -791,7 +799,7 @@ void AUltraMinecraftCharacter::CheckForBlocks()
 
 		CurrentBlock = PotentialBlock;
 		//debug
-		GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, *CurrentBlock->GetName());
+		//GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, *CurrentBlock->GetName());
 	}
 }
 

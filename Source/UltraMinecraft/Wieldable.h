@@ -97,5 +97,5 @@ public:
 	void PlaySound();
 
 private:
-	const int32 NUM_OF_MAX_STACK = 3;
+	const int32 NUM_OF_MAX_STACK = 128;
 };
